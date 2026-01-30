@@ -10,8 +10,11 @@ import ReportSummarizer from "./pages/ReportSummarizer";
 import MedicineInfo from "./pages/MedicineInfo";
 import DiseaseIdentification from "./pages/DiseaseIdentification";
 import NutritionAnalysis from "./pages/NutritionAnalysis";
+import Services from "./pages/Services";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AdminLogin from "./pages/AdminLogin";
+import AdminPanel from "./pages/AdminPanel";
 import Navbar from "@/components/ui/Navbar";
 const queryClient = new QueryClient();
 const App = () => <QueryClientProvider client={queryClient}>
@@ -25,9 +28,13 @@ const App = () => <QueryClientProvider client={queryClient}>
           <Route path="/reports" element={<ReportSummarizer />} />
           <Route path="/medicine" element={<MedicineInfo />} />
           <Route path="/diagnosis" element={<DiseaseIdentification />} />
+          <Route path="/services" element={<Services />} />
           <Route path="/nutrition" element={<NutritionAnalysis />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminPanel />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+              {/* <Route path="/services" element={< />} /> */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
