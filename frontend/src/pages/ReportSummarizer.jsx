@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Camera, Upload, FileText, ArrowLeft, Loader2 } from "lucide-react";
+import { Upload, FileText, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -13,58 +13,10 @@ const ReportSummarizer = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCameraActive, setIsCameraActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment'
-        }
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setIsCameraActive(true);
-      }
-    } catch (error) {
-      toast({
-        title: "Camera Error",
-        description: "Unable to access camera. Please check permissions.",
-        variant: "destructive"
-      });
-    }
-  };
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject;
-      stream.getTracks().forEach(track => track.stop());
-      setIsCameraActive(false);
-    }
-  };
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        canvas.toBlob(blob => {
-          if (blob) {
-            const file = new File([blob], 'captured-report.jpg', {
-              type: 'image/jpeg'
-            });
-            setSelectedFile(file);
-            setPreviewUrl(canvas.toDataURL());
-            stopCamera();
-          }
-        }, 'image/jpeg', 0.8);
-      }
-    }
-  };
+  // Camera functionality removed — upload-only flow
   const handleFileSelect = event => {
     const file = event.target.files?.[0];
     if (file) {
@@ -147,36 +99,21 @@ All values fall within normal ranges. No immediate concerns identified.
                 Upload Medical Report
               </CardTitle>
               <CardDescription>
-                Upload an image of your medical report or use your camera to capture it
+                Upload an image of your medical report for AI-powered analysis
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {!isCameraActive && !previewUrl && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {!previewUrl && <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                   <Button onClick={() => fileInputRef.current?.click()} className="h-24 bg-gradient-to-r from-blue-500 to-cyan-500" size="lg">
                     <Upload className="h-6 w-6 mr-2" />
                     Upload File
-                  </Button>
-                  <Button onClick={startCamera} variant="outline" className="h-24" size="lg">
-                    <Camera className="h-6 w-6 mr-2" />
-                    Use Camera
                   </Button>
                 </div>}
 
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
 
               {/* Camera View */}
-              {isCameraActive && <div className="space-y-4">
-                  <video ref={videoRef} autoPlay playsInline className="w-full rounded-lg bg-black" />
-                  <div className="flex gap-4">
-                    <Button onClick={capturePhoto} className="flex-1">
-                      <Camera className="h-5 w-5 mr-2" />
-                      Capture Photo
-                    </Button>
-                    <Button onClick={stopCamera} variant="outline">
-                      Cancel
-                    </Button>
-                  </div>
-                </div>}
+              {/* Camera removed; upload-only flow */}
 
               {/* Preview */}
               {previewUrl && <div className="space-y-4">
@@ -197,7 +134,7 @@ All values fall within normal ranges. No immediate concerns identified.
                   </div>
                 </div>}
 
-              <canvas ref={canvasRef} className="hidden" />
+              {/* canvas removed */}
             </CardContent>
           </Card>
 
