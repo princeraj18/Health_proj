@@ -51,7 +51,8 @@ const Register = () => {
       }
     }
 
-    const newUser = { name, email, password: hashedPassword };
+    const admin = "admin"
+    const newUser = { name, email, password: hashedPassword , admin };
     users.push(newUser);
 
     try {

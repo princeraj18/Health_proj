@@ -32,97 +32,63 @@ const NutritionAnalysis = () => {
   const removeCondition = condition => {
     setHealthConditions(healthConditions.filter(c => c !== condition));
   };
-  const generateNutritionPlan = async () => {
-    if (!age || !gender || !weight || !height || !activityLevel) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all basic information fields.",
-        variant: "destructive"
-      });
-      return;
+ const generateNutritionPlan = async () => {
+  if (!age || !gender || !weight || !height || !activityLevel) {
+    toast({
+      title: "Missing Information",
+      description: "Please fill in all basic information fields.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsGenerating(true);
+
+  try {
+    const payload = {
+      age: Number(age),
+      gender,
+      weight: Number(weight),
+      height: Number(height),
+      activity: activityLevel, // ✅ backend key
+      conditions: healthConditions.length
+        ? healthConditions.join(", ")
+        : "none",
+    };
+
+    const response = await fetch("http://localhost:8080/api/nutrition", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("API request failed");
     }
-    setIsGenerating(true);
-    try {
-      // Simulate nutrition plan generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      const bmi = Number(weight) / Math.pow(Number(height) / 100, 2);
-      const mockNutritionPlan = {
-        personalInfo: {
-          bmi: bmi.toFixed(1),
-          bmiCategory: bmi < 18.5 ? "Underweight" : bmi < 25 ? "Normal" : bmi < 30 ? "Overweight" : "Obese",
-          dailyCalories: activityLevel === "low" ? 1800 : activityLevel === "moderate" ? 2200 : 2600
-        },
-        macronutrients: {
-          carbohydrates: {
-            percentage: 45,
-            grams: 250,
-            sources: ["Whole grains", "Fruits", "Vegetables"]
-          },
-          proteins: {
-            percentage: 25,
-            grams: 140,
-            sources: ["Lean meats", "Fish", "Legumes", "Dairy"]
-          },
-          fats: {
-            percentage: 30,
-            grams: 75,
-            sources: ["Olive oil", "Nuts", "Avocado", "Fish oil"]
-          }
-        },
-        recommendedFoods: [{
-          category: "Vegetables",
-          items: ["Spinach", "Broccoli", "Bell peppers", "Carrots"],
-          servings: "5-7 per day"
-        }, {
-          category: "Fruits",
-          items: ["Berries", "Apples", "Citrus fruits", "Bananas"],
-          servings: "2-3 per day"
-        }, {
-          category: "Proteins",
-          items: ["Salmon", "Chicken breast", "Lentils", "Greek yogurt"],
-          servings: "2-3 per day"
-        }, {
-          category: "Grains",
-          items: ["Quinoa", "Brown rice", "Oats", "Whole wheat bread"],
-          servings: "3-4 per day"
-        }],
-        avoidFoods: ["Processed meats", "Refined sugars", "Trans fats", "Excessive sodium", "Alcohol (limit consumption)"],
-        specificRecommendations: healthConditions.includes("Diabetes Type 2") ? ["Focus on complex carbohydrates", "Monitor portion sizes", "Include fiber-rich foods", "Limit simple sugars"] : healthConditions.includes("Hypertension") ? ["Reduce sodium intake to <2300mg/day", "Increase potassium-rich foods", "Choose DASH diet principles", "Limit processed foods"] : ["Maintain balanced meals", "Stay hydrated", "Include variety in your diet", "Practice portion control"],
-        supplements: [{
-          name: "Vitamin D",
-          dosage: "1000 IU daily",
-          reason: "Bone health support"
-        }, {
-          name: "Omega-3",
-          dosage: "1000mg daily",
-          reason: "Heart and brain health"
-        }, {
-          name: "Multivitamin",
-          dosage: "1 daily",
-          reason: "Fill nutritional gaps"
-        }],
-        mealTiming: {
-          breakfast: "7:00-8:00 AM",
-          lunch: "12:00-1:00 PM",
-          dinner: "6:00-7:00 PM",
-          snacks: "Mid-morning and afternoon as needed"
-        }
-      };
-      setNutritionPlan(mockNutritionPlan);
-      toast({
-        title: "Nutrition Plan Generated",
-        description: "Your personalized nutrition plan has been created successfully."
-      });
-    } catch (error) {
-      toast({
-        title: "Generation Error",
-        description: "Failed to generate nutrition plan. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+
+    const data = await response.json();
+
+    // Backend returns: { answer: "text..." }
+    setNutritionPlan(data.answer);
+
+    toast({
+      title: "Nutrition Plan Generated",
+      description: "Your personalized nutrition plan is ready.",
+    });
+  } catch (error) {
+    console.error(error);
+    toast({
+      title: "Generation Error",
+      description: "Failed to generate nutrition plan.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
   const resetForm = () => {
     setAge("");
     setGender("");
@@ -252,83 +218,19 @@ const NutritionAnalysis = () => {
                 Your customized diet and nutrition recommendations
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {nutritionPlan ? <div className="space-y-6">
-                  {/* Personal Stats */}
-                  <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">{nutritionPlan.personalInfo.bmi}</div>
-                      <div className="text-sm text-muted-foreground">BMI</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-accent">{nutritionPlan.personalInfo.dailyCalories}</div>
-                      <div className="text-sm text-muted-foreground">Daily Calories</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-semibold">{nutritionPlan.personalInfo.bmiCategory}</div>
-                      <div className="text-sm text-muted-foreground">Category</div>
-                    </div>
-                  </div>
+           <CardContent>
+  {nutritionPlan ? (
+    <div className="whitespace-pre-wrap text-sm bg-muted/50 p-4 rounded-lg leading-relaxed">
+      {nutritionPlan}
+    </div>
+  ) : (
+    <div className="text-center py-12 text-muted-foreground">
+      <Utensils className="h-12 w-12 mx-auto mb-4 opacity-50" />
+      <p>Fill in your health profile to generate a nutrition plan</p>
+    </div>
+  )}
+</CardContent>
 
-                  {/* Macronutrients */}
-                  <div>
-                    <h4 className="font-semibold mb-3">Macronutrient Distribution</h4>
-                    <div className="space-y-3">
-                      {Object.entries(nutritionPlan.macronutrients).map(([key, value]) => <div key={key} className="flex justify-between items-center p-2 bg-muted/20 rounded">
-                          <span className="capitalize font-medium">{key}</span>
-                          <div className="text-right">
-                            <div className="text-sm font-medium">{value.percentage}% ({value.grams}g)</div>
-                            <div className="text-xs text-muted-foreground">
-                              {value.sources.slice(0, 2).join(", ")}
-                            </div>
-                          </div>
-                        </div>)}
-                    </div>
-                  </div>
-
-                  {/* Recommended Foods */}
-                  <div>
-                    <h4 className="font-semibold mb-3">Recommended Foods</h4>
-                    <div className="space-y-3">
-                      {nutritionPlan.recommendedFoods.map((category, index) => <div key={index} className="border-l-4 border-green-400 pl-3">
-                          <div className="font-medium text-green-700">{category.category}</div>
-                          <div className="text-sm text-muted-foreground mb-1">{category.servings}</div>
-                          <div className="text-sm">{category.items.join(", ")}</div>
-                        </div>)}
-                    </div>
-                  </div>
-
-                  {/* Foods to Avoid */}
-                  <div>
-                    <h4 className="font-semibold mb-3">Foods to Limit/Avoid</h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm bg-red-50 p-3 rounded-lg">
-                      {nutritionPlan.avoidFoods.map((food, index) => <li key={index} className="text-red-700">{food}</li>)}
-                    </ul>
-                  </div>
-
-                  {/* Specific Recommendations */}
-                  <div>
-                    <h4 className="font-semibold mb-3">Specific Recommendations</h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm bg-blue-50 p-3 rounded-lg">
-                      {nutritionPlan.specificRecommendations.map((rec, index) => <li key={index} className="text-blue-700">{rec}</li>)}
-                    </ul>
-                  </div>
-
-                  {/* Meal Timing */}
-                  <div>
-                    <h4 className="font-semibold mb-3">Recommended Meal Timing</h4>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      {Object.entries(nutritionPlan.mealTiming).map(([meal, time]) => <div key={meal} className="flex justify-between p-2 bg-muted/20 rounded">
-                          <span className="capitalize font-medium">{meal}</span>
-                          <span className="text-muted-foreground">{time}</span>
-                        </div>)}
-                    </div>
-                  </div>
-                </div> : <div className="text-center py-12 text-muted-foreground">
-                  <Utensils className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Fill in your health profile to generate a personalized nutrition plan</p>
-                </div>}
-            </CardContent>
           </Card>
         </div>
       </div>

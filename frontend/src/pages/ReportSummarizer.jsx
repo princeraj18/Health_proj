@@ -25,49 +25,47 @@ const ReportSummarizer = () => {
       setPreviewUrl(url);
     }
   };
-  const analyzeReport = async () => {
-    if (!selectedFile) return;
-    setIsProcessing(true);
-    try {
-      // Simulate OCR and NLP analysis
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      const mockAnalysis = `
-**Medical Report Analysis Summary**
+ const analyzeReport = async () => {
+  if (!selectedFile) return;
 
-**Document Type:** Blood Test Results
-**Date:** ${new Date().toLocaleDateString()}
+  setIsProcessing(true);
 
-**Key Findings:**
-• **Hemoglobin:** 12.5 g/dL (Normal range: 12.0-15.5 g/dL) ✅
-• **White Blood Cell Count:** 7,200/μL (Normal range: 4,000-11,000/μL) ✅
-• **Platelet Count:** 250,000/μL (Normal range: 150,000-450,000/μL) ✅
-• **Glucose:** 95 mg/dL (Normal range: 70-100 mg/dL) ✅
+  try {
+    const formData = new FormData();
+    formData.append("report", selectedFile); // ✅ MUST be "report"
 
-**Overall Assessment:**
-All values fall within normal ranges. No immediate concerns identified.
+    const response = await fetch("http://localhost:8080/api/report", {
+      method: "POST",
+      body: formData,
+    });
 
-**Recommendations:**
-• Maintain current health practices
-• Follow up with your healthcare provider as scheduled
-• Continue balanced diet and regular exercise
-
-**Important Note:** This is an AI-generated summary. Please consult your healthcare provider for professional medical interpretation.
-      `;
-      setAnalysisResult(mockAnalysis);
-      toast({
-        title: "Analysis Complete",
-        description: "Your medical report has been successfully analyzed."
-      });
-    } catch (error) {
-      toast({
-        title: "Analysis Error",
-        description: "Failed to analyze the report. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
+    if (!response.ok) {
+      throw new Error("API request failed");
     }
-  };
+
+    const data = await response.json();
+
+    setAnalysisResult(data.answer); // ✅ backend returns "answer"
+
+    toast({
+      title: "Analysis Complete",
+      description: "Your medical report has been successfully analyzed.",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    toast({
+      title: "Analysis Error",
+      description: "Failed to analyze the report. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
+
   const resetAnalysis = () => {
     setSelectedFile(null);
     setPreviewUrl(null);

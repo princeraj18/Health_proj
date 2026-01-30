@@ -26,45 +26,45 @@ const MedicineInfo = () => {
       setPreviewUrl(url);
     }
   };
-  const identifyMedicine = async () => {
-    if (!selectedFile) return;
-    setIsProcessing(true);
-    try {
-      // Simulate medicine identification
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      const mockMedicineData = {
-        name: "Paracetamol",
-        genericName: "Acetaminophen",
-        strength: "500mg",
-        manufacturer: "Generic Pharma",
-        type: "Tablet",
-        uses: ["Pain relief", "Fever reduction", "Headache treatment", "Muscle pain relief"],
-        dosage: {
-          adults: "1-2 tablets every 4-6 hours",
-          children: "Consult pediatrician for proper dosage",
-          maxDaily: "8 tablets (4000mg) per day"
-        },
-        sideEffects: ["Nausea (rare)", "Allergic reactions (very rare)", "Liver damage (with overdose)"],
-        contraindications: ["Severe liver disease", "Alcohol dependency", "Known allergy to acetaminophen"],
-        interactions: ["Warfarin (blood thinner)", "Isoniazid (TB medication)", "Alcohol (increases liver toxicity risk)"],
-        storage: "Store at room temperature, away from moisture and heat",
-        warnings: ["Do not exceed recommended dose", "Consult doctor if symptoms persist", "Not recommended during pregnancy without medical advice"]
-      };
-      setMedicineInfo(mockMedicineData);
-      toast({
-        title: "Medicine Identified",
-        description: "Successfully identified the medicine and retrieved information."
-      });
-    } catch (error) {
-      toast({
-        title: "Identification Error",
-        description: "Failed to identify the medicine. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
+ const identifyMedicine = async () => {
+  if (!selectedFile) return;
+
+  setIsProcessing(true);
+
+  try {
+    const formData = new FormData();
+    formData.append("medicine_image", selectedFile); // MUST match backend
+
+    const response = await fetch("http://localhost:8080/api/medicine", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("API request failed");
     }
-  };
+
+    const data = await response.json();
+
+    // Backend returns { answer: "text..." }
+    setMedicineInfo(data.answer);
+
+    toast({
+      title: "Medicine Analysis Complete",
+      description: "Medicine details retrieved successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+    toast({
+      title: "Analysis Error",
+      description: "Failed to analyze the medicine image.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsProcessing(false);
+  }
+};
+
   const resetAnalysis = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
@@ -143,65 +143,19 @@ const MedicineInfo = () => {
                 Detailed information about the identified medicine
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              {medicineInfo ? <div className="space-y-6">
-                  {/* Basic Info */}
-                  <div className="border-b pb-4">
-                    <h3 className="text-2xl font-bold text-foreground">{medicineInfo.name}</h3>
-                    <p className="text-muted-foreground">Generic: {medicineInfo.genericName}</p>
-                    <div className="flex gap-2 mt-2">
-                      <Badge variant="secondary">{medicineInfo.strength}</Badge>
-                      <Badge variant="outline">{medicineInfo.type}</Badge>
-                    </div>
-                  </div>
+           <CardContent>
+  {medicineInfo ? (
+    <div className="whitespace-pre-wrap text-sm bg-muted/50 p-4 rounded-lg leading-relaxed">
+      {medicineInfo}
+    </div>
+  ) : (
+    <div className="text-center py-12 text-muted-foreground">
+      <Pill className="h-12 w-12 mx-auto mb-4 opacity-50" />
+      <p>Scan a medicine image to see details here</p>
+    </div>
+  )}
+</CardContent>
 
-                  {/* Uses */}
-                  <div>
-                    <h4 className="font-semibold mb-2 flex items-center">
-                      <Info className="h-4 w-4 mr-1 text-blue-600" />
-                      Uses
-                    </h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      {medicineInfo.uses.map((use, index) => <li key={index}>{use}</li>)}
-                    </ul>
-                  </div>
-
-                  {/* Dosage */}
-                  <div>
-                    <h4 className="font-semibold mb-2">Dosage</h4>
-                    <div className="text-sm space-y-1 bg-muted/50 p-3 rounded-lg">
-                      <p><strong>Adults:</strong> {medicineInfo.dosage.adults}</p>
-                      <p><strong>Children:</strong> {medicineInfo.dosage.children}</p>
-                      <p><strong>Maximum Daily:</strong> {medicineInfo.dosage.maxDaily}</p>
-                    </div>
-                  </div>
-
-                  {/* Side Effects */}
-                  <div>
-                    <h4 className="font-semibold mb-2 flex items-center">
-                      <AlertTriangle className="h-4 w-4 mr-1 text-yellow-600" />
-                      Side Effects
-                    </h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      {medicineInfo.sideEffects.map((effect, index) => <li key={index}>{effect}</li>)}
-                    </ul>
-                  </div>
-
-                  {/* Warnings */}
-                  <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2 flex items-center text-destructive">
-                      <AlertTriangle className="h-4 w-4 mr-1" />
-                      Important Warnings
-                    </h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      {medicineInfo.warnings.map((warning, index) => <li key={index}>{warning}</li>)}
-                    </ul>
-                  </div>
-                </div> : <div className="text-center py-12 text-muted-foreground">
-                  <Pill className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Scan a medicine to see detailed information here</p>
-                </div>}
-            </CardContent>
           </Card>
         </div>
       </div>
