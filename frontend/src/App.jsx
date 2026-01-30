@@ -11,6 +11,7 @@ import MedicineInfo from "./pages/MedicineInfo";
 import DiseaseIdentification from "./pages/DiseaseIdentification";
 import NutritionAnalysis from "./pages/NutritionAnalysis";
 import Services from "./pages/Services";
+import Camps from "./pages/Camps";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminLogin from "./pages/AdminLogin";
@@ -29,6 +30,7 @@ const App = () => <QueryClientProvider client={queryClient}>
           <Route path="/medicine" element={<MedicineInfo />} />
           <Route path="/diagnosis" element={<DiseaseIdentification />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/camps" element={<Camps />} />
           <Route path="/nutrition" element={<NutritionAnalysis />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminPanel />} />
