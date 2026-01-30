@@ -10,11 +10,100 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Placeholder - integrate registration logic here
+    // Save user to localStorage (simple local registration)
+    // Defensive: ensure localStorage is available
+    if (typeof window === "undefined" || !window.localStorage) {
+      alert("Local storage is not available in this environment. Registration cannot proceed.");
+      return;
+    }
+
+    // read existing users (non-fatal)
+    let users = [];
+    try {
+      const stored = localStorage.getItem("users");
+      if (stored) users = JSON.parse(stored) || [];
+    } catch (err) {
+      console.warn("Could not read existing users from localStorage, continuing with empty list:", err);
+      users = [];
+    }
+
+    // prevent duplicate email
+    if (users.find((u) => u.email === email)) {
+      alert("An account with this email already exists.");
+      return;
+    }
+
+    // hash password before storing (client-side SHA-256). Use fallback if hashing fails.
+    let hashedPassword;
+    try {
+      hashedPassword = await hashPassword(password);
+      if (!hashedPassword) throw new Error("Empty hash returned");
+    } catch (err) {
+      console.warn("Password hashing failed, falling back to base64 (insecure):", err);
+      try {
+        hashedPassword = btoa(password);
+      } catch (b64err) {
+        console.error("Base64 fallback failed:", b64err);
+        alert("Unable to process password for registration.");
+        return;
+      }
+    }
+
+    const newUser = { name, email, password: hashedPassword };
+    users.push(newUser);
+
+    try {
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("currentUser", JSON.stringify(newUser));
+      // notify other components in this tab to update auth state
+      try { window.dispatchEvent(new Event('authChanged')); } catch (e) {}
+      console.log("Registered user:", newUser);
+    } catch (err) {
+      console.error("Failed to write user to localStorage:", err);
+      alert("Registration failed: cannot save data locally.");
+      return;
+    }
+
+    // clear inputs (optional)
+    setName("");
+    setEmail("");
+    setPassword("");
+
     navigate("/");
   };
+
+  // simple SHA-256 hash using Web Crypto API; returns hex string
+  async function hashPassword(pwd) {
+    try {
+      if (typeof crypto !== "undefined" && crypto.subtle && crypto.subtle.digest) {
+        const enc = new TextEncoder();
+        const data = enc.encode(pwd);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+      }
+    } catch (e) {
+      console.warn("Web Crypto digest failed, falling back to JS implementation:", e);
+    }
+
+    // Fallback: use the simpleHexHash fallback declared below
+    return simpleHexHash(pwd);
+  }
+
+  // Fallback: simple (non-cryptographic) hex hash for environments without Web Crypto
+  function simpleHexHash(str) {
+    let h1 = 0xdeadbeef ^ str.length;
+    let h2 = 0x41c6ce57 ^ str.length;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761) >>> 0;
+      h2 = Math.imul(h2 ^ ch, 1597334677) >>> 0;
+    }
+    // combine to 64-bit-like hex string
+    return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
