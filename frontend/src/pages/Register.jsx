@@ -106,30 +106,75 @@ const Register = () => {
     return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <div className="w-full max-w-md bg-card/95 backdrop-blur p-8 rounded-lg border">
-        <h2 className="text-2xl font-semibold mb-4 text-foreground">Create an account</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Name</Label>
-            <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required />
-          </div>
-          <div>
-            <Label>Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
-          </div>
-          <div>
-            <Label>Password</Label>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
-          </div>
-          <div className="pt-2">
-            <Button type="submit" className="w-full">Register</Button>
-          </div>
-        </form>
-      </div>
+ return (
+  <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="w-full max-w-md bg-white p-8 rounded-md border border-gray-200 shadow-sm">
+      
+      <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+        Create Account
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        
+        <div>
+          <Label className="text-sm  block text-left text-gray-700">Name</Label>
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="John Doe"
+            className="mt-1"
+            required
+          />
+        </div>
+
+        <div>
+          <Label className="text-sm  block text-left text-gray-700">Email</Label>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="mt-1 "
+            required
+          />
+        </div>
+
+        <div>
+          <Label className="text-sm   block text-left  text-gray-700">Password</Label>
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="mt-1 "
+            required
+          />
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full mt-4 bg-green-600 hover:bg-green-800 text-white"
+        >
+          Register
+        </Button>
+
+<div className="mt-6 text-center">
+          <p className="text-gray-600 text-sm">
+            You have an account?{" "}
+            <button 
+              onClick={() => navigate('/login')} 
+              className="text-green-600 hover:text-green-800 font-medium"
+            >
+              Login here
+            </button>
+          </p>
+        </div>
+      </form>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Register;

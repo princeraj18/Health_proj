@@ -1,3 +1,5 @@
+
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -83,25 +85,73 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <div className="w-full max-w-md bg-card/95 backdrop-blur p-8 rounded-lg border">
-        <h2 className="text-2xl font-semibold mb-4 text-foreground">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-sm bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className=" mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Login</h2>
+          <p className="text-gray-600 mt-1">Enter your credentials to continue</p>
+        </div>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+           <Label
+  htmlFor="email"
+  className="block text-left text-gray-700"
+>
+  Email
+</Label>
+
+            <Input 
+              id="email"
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              placeholder="you@example.com" 
+              required 
+              className="mt-1"
+            />
           </div>
+          
           <div>
-            <Label>Password</Label>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
+            <Label htmlFor="password" className="text-gray-700  block text-left">Password</Label>
+            <Input 
+              id="password"
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              placeholder="••••••••" 
+              required 
+              className="mt-1"
+            />
           </div>
-          <div className="pt-2">
-            <Button type="submit" className="w-full">Sign in</Button>
-          </div>
-          <div className="pt-2 text-center">
-            <Button variant="ghost" onClick={() => navigate('/admin-login')} className="w-full">Admin Login</Button>
+          
+          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white">
+            Sign In
+          </Button>
+          
+          <div className="text-center">
+            <p className="text-gray-600 text-sm mb-2">or</p>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/admin-login')} 
+              className="w-full border border-gray-300 hover:bg-gray-50"
+            >
+              Admin Login
+            </Button>
           </div>
         </form>
+        
+        <div className="mt-6 text-center">
+          <p className="text-gray-600 text-sm">
+            Don't have an account?{" "}
+            <button 
+              onClick={() => navigate('/register')} 
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Register here
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

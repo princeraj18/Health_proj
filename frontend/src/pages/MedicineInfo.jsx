@@ -35,7 +35,7 @@ const MedicineInfo = () => {
     const formData = new FormData();
     formData.append("medicine_image", selectedFile); // MUST match backend
 
-    const response = await fetch("http://localhost:8080/api/medicine", {
+    const response = await fetch("https://grocery.offershubs.in/api/medicine", {
       method: "POST",
       body: formData,
     });

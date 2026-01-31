@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 const NutritionAnalysis = () => {
   const navigate = useNavigate();
   const {
@@ -56,7 +58,7 @@ const NutritionAnalysis = () => {
         : "none",
     };
 
-    const response = await fetch("http://localhost:8080/api/nutrition", {
+    const response = await fetch("https://grocery.offershubs.in/api/nutrition", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -220,15 +222,17 @@ const NutritionAnalysis = () => {
             </CardHeader>
            <CardContent>
   {nutritionPlan ? (
-    <div className="whitespace-pre-wrap text-sm bg-muted/50 p-4 rounded-lg leading-relaxed">
+  <div className="prose prose-sm max-w-none bg-muted/50 p-4 rounded-lg leading-relaxed">
+    <ReactMarkdown remarkPlugins={[remarkGfm]}>
       {nutritionPlan}
-    </div>
-  ) : (
-    <div className="text-center py-12 text-muted-foreground">
-      <Utensils className="h-12 w-12 mx-auto mb-4 opacity-50" />
-      <p>Fill in your health profile to generate a nutrition plan</p>
-    </div>
-  )}
+    </ReactMarkdown>
+  </div>
+) : (
+  <div className="text-center py-12 text-muted-foreground">
+    <Utensils className="h-12 w-12 mx-auto mb-4 opacity-50" />
+    <p>Fill in your health profile to generate a nutrition plan</p>
+  </div>
+)}
 </CardContent>
 
           </Card>
